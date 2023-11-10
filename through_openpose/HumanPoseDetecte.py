@@ -11,7 +11,7 @@ import time
 import numpy as np
 from random import randint
 
-# 供内部调用的函数
+# Inside function
 def getKeypoints(probMap, threshold=0.1):
     
     mapSmooth = cv2.GaussianBlur(probMap, (3,3), 0, 0)
@@ -19,7 +19,6 @@ def getKeypoints(probMap, threshold=0.1):
     keypoints = []
 
     #find the blobs
-    # 可能会遇到opencv版本不对的问题，导致下面的函数返回值不一样，删除第一个下划线就行了
     contours, _ = cv2.findContours(mapMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)   #find profile
 
     #for each blob find the maxima
@@ -37,7 +36,7 @@ def getKeypoints(probMap, threshold=0.1):
     return keypoints
 
 
-# 供内部调用的函数
+
 # Find valid connections between the different joints of a all persons present
 def getValidPairs(output, mapIdx, frameWidth, frameHeight, POSE_PAIRS, detected_keypoints):
 
@@ -86,7 +85,7 @@ def getValidPairs(output, mapIdx, frameWidth, frameHeight, POSE_PAIRS, detected_
                         
                     # Find p(u)
                     interp_coord = list(zip(np.linspace(candA[i][0], candB[j][0], num=n_interp_samples),   
-                                            np.linspace(candA[i][1], candB[j][1], num=n_interp_samples)))  #打包成元组 """均匀步长生成数字序列"""
+                                            np.linspace(candA[i][1], candB[j][1], num=n_interp_samples))) 
 
                     # Find L(p(u))
                     paf_interp = []
@@ -100,7 +99,7 @@ def getValidPairs(output, mapIdx, frameWidth, frameHeight, POSE_PAIRS, detected_
 
                     # Check if the connection is valid
                     # If the fraction of interpolated vectors aligned with PAF is higher then threshold -> Valid Pair
-                    if ( len(np.where(paf_scores > paf_score_th)[0]) / n_interp_samples ) > conf_th :  #where返回符合条件的元素的坐标
+                    if ( len(np.where(paf_scores > paf_score_th)[0]) / n_interp_samples ) > conf_th : 
                         if avg_paf_score > maxScore:
                             max_j = j
                             maxScore = avg_paf_score
@@ -124,7 +123,7 @@ def getValidPairs(output, mapIdx, frameWidth, frameHeight, POSE_PAIRS, detected_
     return valid_pairs, invalid_pairs
 
 
-# 供内部调用的函数
+
 # This function creates a list of keypoints belonging to each person
 # For each detected valid pair, it assigns the joint(s) to a person
 def getPersonwiseKeypoints(valid_pairs, invalid_pairs, mapIdx, POSE_PAIRS, keypoints_list):
@@ -166,7 +165,7 @@ def getPersonwiseKeypoints(valid_pairs, invalid_pairs, mapIdx, POSE_PAIRS, keypo
                     print('not found')
                     print(personwiseKeypoints)
 
-    x=[]  #判断是否为人
+    x=[]  
     for n in range(len(personwiseKeypoints)):
         if personwiseKeypoints[n][-1] < threshold:
             x.append(n)
@@ -175,14 +174,14 @@ def getPersonwiseKeypoints(valid_pairs, invalid_pairs, mapIdx, POSE_PAIRS, keypo
     return personwiseKeypoints
 
 
-# 供外部调用的主要函数
+# Outside function
 def humanPoseDetector(img):
     """
     input: one image(contain just one person) to detect the human pose
     output: the image whose size is changed and pose is drawed and the location of keypoints that are detected 
             and the valied pairs
     """
-    # 读取神经网络
+    # read model
     protoFile = "./weights/pose_deploy_linevec.prototxt"
     weightsFile = "./weights/pose_iter_440000.caffemodel"
 
@@ -191,7 +190,7 @@ def humanPoseDetector(img):
     # COCO Output Format
     keypointsMapping = ['Nose', 'Neck', 'R-Sho', 'R-Elb', 'R-Wr', 'L-Sho', 'L-Elb', 'L-Wr', 'R-Hip', 
                     'R-Knee', 'R-Ank', 'L-Hip', 'L-Knee', 'L-Ank', 'R-Eye', 'L-Eye', 'R-Ear', 'L-Ear']
-    # 关节配对，例如膝盖和脚踝
+    # pair
     POSE_PAIRS = [[1,2], [1,5], [2,3], [3,4], [5,6], [6,7],
                   [1,8], [8,9], [9,10], [1,11], [11,12], [12,13],
                   [1,0], [0,14], [14,16], [0,15], [15,17],
@@ -217,14 +216,14 @@ def humanPoseDetector(img):
     t = time.time()
     net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 
-    # 调整输入高度，并根据图像纵横比改变输入宽度
+    # change height
     inHeight = 368
     inWidth = int((inHeight/frameHeight)*frameWidth)
 
     inpBlob = cv2.dnn.blobFromImage(img, 1.0 / 255, (inWidth, inHeight),
                           (0, 0, 0), swapRB=False, crop=False)
 
-    # 向前通过网络
+    # forward
     net.setInput(inpBlob)
     output = net.forward()
 
@@ -241,15 +240,14 @@ def humanPoseDetector(img):
     for part in range(nPoints):
         probMap = output[0,part,:,:]
         probMap = cv2.resize(probMap, (img.shape[1], img.shape[0]))
-        keypoints = getKeypoints(probMap, threshold)      #此处必须把keypoints_location变量放在前面，因为其没有默认值，有默认值的不能放在最前面
+        keypoints = getKeypoints(probMap, threshold)      
         #keypoints_temp = list(keypoints[0])
-        # 将所有关键点的坐标存放在一个列表里，为一个二维列表，每一元素为一含有三个元素的列表，分别为坐标和编号
         if keypoints != []:
             keypoints_temp = list(keypoints[0])
             keypoints_temp[2] = part
-            keypoints_location.append(keypoints_temp)                   # 删除每一个点坐标的第三个置信度，将其变为对应的关节点的编号
+            keypoints_location.append(keypoints_temp)                  
         else:
-            keypoints_location.append(keypoints)           # 如果没有检测到，直接补空列表
+            keypoints_location.append(keypoints)           
         
         print("Keypoints - {} : {}".format(keypointsMapping[part], keypoints))
         keypoints_with_id = []
@@ -313,7 +311,7 @@ def humanPoseDetector(img):
 PATH1 = 'C:/Users/Rzy/Desktop/safety_dataset/train/1 (2).MOV'+'/00000010.jpg'
 PATH2 = 'C:/Users/Rzy/Desktop/safety_dataset/train/2 (2).MOV'+'/00000010.jpg'
 PATH3 = 'C:/Users/Rzy/Desktop/a.jpg'
-
+# used to fine the picture or use the inside camera
 img = cv2.imread(PATH3)
 
 keypointsImg, lineImg, keypoints_location, valid_pairs,invalid_pairs,personwiseKeypoints,keypoints_list,detected_keypoints = humanPoseDetector(img)
