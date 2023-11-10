@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33403.182
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "through_openpose", "through_openpose.pyproj", "{0E304553-D4C5-40F5-BCC0-14DB1DD3FD50}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0E304553-D4C5-40F5-BCC0-14DB1DD3FD50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E304553-D4C5-40F5-BCC0-14DB1DD3FD50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {82DC8FBC-EBF3-457A-A35E-144EF85D37F2}
+	EndGlobalSection
+EndGlobal
